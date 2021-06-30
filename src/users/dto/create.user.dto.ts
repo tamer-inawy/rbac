@@ -1,4 +1,5 @@
-import { IsString, IsEmail, IsOptional } from 'class-validator';
+import { Role } from 'src/roles/role.entity';
+import { IsString, IsEmail, IsOptional, IsArray } from 'class-validator';
 
 export class CreateUserDto {
   @IsEmail()
@@ -7,6 +8,6 @@ export class CreateUserDto {
   @IsString()
   password: string;
 
-  @IsOptional()
-  name?: string;
+  @IsArray()
+  roles: Role[];
 }

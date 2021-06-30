@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/users/user.entity';
 import { CreateUserDto } from 'src/users/dto/create.user.dto';
 import { EditUserDto } from 'src/users/dto/edit.user.dto';
+import { Role } from 'src/auth/role.enum';
 
 @Injectable()
 export class UsersService {
@@ -24,7 +25,25 @@ export class UsersService {
   }
 
   list(): Promise<User[]> {
-    return this.usersRepository.find();
+    return this.usersRepository.find({
+      relations: ['roles'],
+    });
+  }
+
+  listByGroups(groups: Array<number>): Promise<User[]> {
+    return this.usersRepository
+      .find({
+        relations: ['roles'],
+      })
+      .then((list) => {
+        // TODO: Replace the next filter with db query for better performance
+        return list.filter((user) => {
+          for (const r of user.roles) {
+            if (groups.indexOf(r.groupid) !== -1) return true;
+          }
+          return false;
+        });
+      });
   }
 
   async update(id: string, dto: EditUserDto) {
@@ -34,6 +53,23 @@ export class UsersService {
   }
 
   findOne(id: string): Promise<User> {
-    return this.usersRepository.findOne(id);
+    return this.usersRepository.findOne({
+      where: { id: id },
+      relations: ['roles'],
+    });
+  }
+
+  findOneByEmail(email: string): Promise<User> {
+    return this.usersRepository.findOne({
+      where: { email },
+      relations: ['roles'],
+    });
+  }
+
+  isUserInGroup(user: User, groups: Array<number>) {
+    for (const r of user.roles) {
+      if (groups.indexOf(r.groupid) !== -1) return true;
+    }
+    return false;
   }
 }

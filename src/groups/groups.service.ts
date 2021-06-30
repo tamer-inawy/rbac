@@ -24,7 +24,9 @@ export class GroupsService {
   }
 
   list(): Promise<Group[]> {
-    return this.groupsRepository.find();
+    return this.groupsRepository.find({
+      relations: ['collections'],
+    });
   }
 
   async update(id: string, dto: EditGroupDto) {
@@ -35,6 +37,23 @@ export class GroupsService {
   }
 
   findOne(id: string): Promise<Group> {
-    return this.groupsRepository.findOne(id);
+    return this.groupsRepository.findOne({
+      where: { id: id },
+      relations: ['collections'],
+    });
+  }
+
+  listByGroups(groups: Array<number>): Promise<Group[]> {
+    return this.groupsRepository
+      .find({
+        relations: ['collections'],
+      })
+      .then((list) => {
+        // TODO: Replace the next filter with db query for better performance
+        return list.filter((group) => {
+          if (groups.indexOf(group.id) !== -1) return true;
+          return false;
+        });
+      });
   }
 }

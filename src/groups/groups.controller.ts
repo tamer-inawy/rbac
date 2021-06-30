@@ -1,4 +1,6 @@
-import { EditGroupDto } from './dto/edit.group.dto';
+import { REQUEST } from '@nestjs/core';
+
+import { EditGroupDto } from 'src/groups/dto/edit.group.dto';
 import { CreateGroupDto } from 'src/groups/dto/create.group.dto';
 import { GroupsService } from 'src/groups/groups.service';
 import {
@@ -6,6 +8,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Post,
   Put,
@@ -13,20 +16,25 @@ import {
 
 @Controller('groups')
 export class GroupsController {
-  constructor(private readonly groupsService: GroupsService) {}
+  constructor(
+    @Inject(REQUEST) private req: any,
+    private readonly groupsService: GroupsService,
+  ) {}
 
   @Get()
   list(): Promise<any> {
-    return this.groupsService.list();
+    return this.req.user.isGlobalManager
+      ? this.groupsService.list()
+      : this.groupsService.listByGroups(this.req.user.managedGroups);
   }
 
   @Get(':id')
-  findOne(@Param() params): Promise<any> {
-    return this.groupsService.findOne(params.id);
+  findOne(@Param('id') id): Promise<any> {
+    return this.groupsService.findOne(id);
   }
 
   @Post()
-  async create(@Body() groupDto: CreateGroupDto) {
+  create(@Body() groupDto: CreateGroupDto) {
     return this.groupsService.create(groupDto);
   }
 
@@ -37,7 +45,7 @@ export class GroupsController {
 
   @Put(':id')
   update(@Param('id') id: string, @Body() groupDto: EditGroupDto) {
-    console.log(groupDto);
+    // console.log(groupDto);
     return this.groupsService.update(id, groupDto);
   }
 }
