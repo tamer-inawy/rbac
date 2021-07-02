@@ -9,7 +9,6 @@ import { Role } from 'src/auth/role.enum';
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
-  // TODO: Retrieve the user roles from DB to make sure it's up to date with the changes after last login
   canActivate(context: ExecutionContext): boolean {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -19,6 +18,7 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
+    // TODO: Retrieve the user roles from DB to make sure it's up to date with the changes after last login
     const req = context.switchToHttp().getRequest();
     const userRoles = req.user.user.roles || [];
     const isGlobalManager =

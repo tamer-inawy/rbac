@@ -28,7 +28,10 @@ export class UsersController {
   list(): Promise<any> {
     return this.req.user.isGlobalManager
       ? this.usersService.list()
-      : this.usersService.listByGroups(this.req.user.managedGroups);
+      : this.usersService.listByGroups(
+          this.req.user.user.id,
+          this.req.user.managedGroups,
+        );
   }
 
   @Get(':id')
@@ -47,7 +50,7 @@ export class UsersController {
   @Post()
   async create(@Body() userDto: CreateUserDto) {
     // TODO: Combine creating users with roles for better handling,
-    //       for now if the user is allowed to create a new user if he is a global manager or a manager for any group
+    //       for now the user is allowed to create a new user if he is a global manager or a manager for any group
     if (
       !this.req.user.isGlobalManager &&
       this.req.user.managedGroups.length === 0

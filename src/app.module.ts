@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 
 import { AppController } from 'src/app.controller';
-import { AppService } from 'src/app.service';
 import { UsersModule } from 'src/users/users.module';
 import { GroupsModule } from 'src/groups/groups.module';
 import { RolesModule } from 'src/roles/roles.module';
@@ -13,6 +13,7 @@ import { AuthModule } from 'src/auth/auth.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     UsersModule,
     GroupsModule,
     RolesModule,
@@ -21,6 +22,6 @@ import { AuthModule } from 'src/auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [],
 })
 export class AppModule {}

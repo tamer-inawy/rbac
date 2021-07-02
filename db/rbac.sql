@@ -102,6 +102,6 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 
 
-INSERT INTO `rbac`.`user` (`id`, `email`, `password`) VALUES (NULL, 'admin@test.com', 'admin');
+INSERT INTO `rbac`.`user` (`id`, `email`, `password`) VALUES (NULL, 'admin@test.com', '$2b$10$LWoIC8MoNAcs2j39x6K7gOETyEhpkWXOBMkk.z4hiAwleYCWadGj.');
 
 INSERT INTO `rbac`.`role` (`id`, `role`, `groupid`, `userid`) VALUES (NULL, 'globalManager', NULL, '1');
