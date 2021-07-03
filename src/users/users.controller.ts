@@ -41,7 +41,7 @@ export class UsersController {
     if (
       this.req.user.isGlobalManager ||
       this.usersService.isUserInGroup(user, this.req.user.managedGroups) ||
-      this.req.user.user.id === user.id
+      (this.req.user.user.id === user.id && this.req.user.isRegularUser)
     )
       return user;
     throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
