@@ -20,7 +20,7 @@ export class UsersService {
     );
     const newUser = await this.usersRepository.create(resource);
     const user = await this.usersRepository.save(newUser);
-    delete user.password;
+    delete user?.password;
 
     return user;
   }
@@ -35,7 +35,7 @@ export class UsersService {
     });
     // TODO: Elemenate the password from the entity using @Column({select: false}) instead of the following map
     return list.map((user) => {
-      delete user.password;
+      delete user?.password;
       return user;
     });
   }
@@ -48,9 +48,9 @@ export class UsersService {
       .then((list) => {
         // TODO: Replace the next filter with db query for better performance
         return list.filter((user) => {
-          delete user.password;
+          delete user?.password;
           for (const r of user.roles) {
-            if (groups.indexOf(r.groupid) !== -1) return true;
+            if (groups.indexOf(r.group.id) !== -1) return true;
           }
           return user.id === userId;
         });
@@ -62,6 +62,7 @@ export class UsersService {
       dto.password = await bcrypt.hash(dto.password, +process.env.BCRYPT_SALT);
 
     const user = await this.findOne(id);
+
     const editedUser = Object.assign(user, dto);
     return this.usersRepository.save(editedUser);
   }
@@ -71,7 +72,7 @@ export class UsersService {
       where: { id: id },
       relations: ['roles'],
     });
-    delete user.password;
+    delete user?.password;
     return user;
   }
 
@@ -84,7 +85,7 @@ export class UsersService {
 
   isUserInGroup(user: User, groups: Array<number>) {
     for (const r of user.roles) {
-      if (groups.indexOf(r.groupid) !== -1) return true;
+      if (groups.indexOf(r.group.id) !== -1) return true;
     }
     return false;
   }

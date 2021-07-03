@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 
 import { Role as RoleEnum } from 'src/auth/role.enum';
+import { Group } from 'src/groups/group.entity';
 
 @Entity()
 export class Role extends BaseEntity {
@@ -17,9 +18,12 @@ export class Role extends BaseEntity {
   @Column('enum', { enum: RoleEnum })
   role: RoleEnum;
 
-  @Column()
-  groupid: number | null;
+  // @Column()
+  // groupid: number | null;
 
   @ManyToOne((type) => User, (user) => user.roles)
   user: User;
+
+  @ManyToOne((type) => Group, (group) => group.roles)
+  group: Group;
 }

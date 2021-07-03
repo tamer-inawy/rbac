@@ -30,6 +30,8 @@ export class ItemsService {
 
   async update(id: string, dto: EditItemDto) {
     const item = await this.findOne(id);
+    if (!item) return null;
+
     const editedItem = Object.assign(item, dto);
     return this.itemsRepository.save(editedItem);
   }

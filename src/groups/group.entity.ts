@@ -1,5 +1,3 @@
-import { Collection } from 'src/collections/collection.entity';
-
 import {
   Entity,
   Column,
@@ -7,6 +5,9 @@ import {
   BaseEntity,
   OneToMany,
 } from 'typeorm';
+
+import { Collection } from 'src/collections/collection.entity';
+import { Role } from 'src/roles/role.entity';
 
 @Entity()
 export class Group extends BaseEntity {
@@ -18,4 +19,7 @@ export class Group extends BaseEntity {
 
   @OneToMany(() => Collection, (collection) => collection.grp)
   collections: Collection[];
+
+  @OneToMany(() => Role, (role) => role.group)
+  roles: Role[];
 }

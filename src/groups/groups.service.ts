@@ -31,6 +31,8 @@ export class GroupsService {
 
   async update(id: string, dto: EditGroupDto) {
     const group = await this.findOne(id);
+    if (!group) return null;
+
     const editedGroup = Object.assign(group, dto);
 
     return this.groupsRepository.save(editedGroup);

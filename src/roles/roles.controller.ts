@@ -1,8 +1,10 @@
+import { REQUEST } from '@nestjs/core';
 import {
   Body,
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Post,
   Put,
@@ -14,10 +16,14 @@ import { RolesService } from 'src/roles/roles.service';
 
 @Controller('roles')
 export class RolesController {
-  constructor(private readonly rolesService: RolesService) {}
+  constructor(
+    private readonly rolesService: RolesService,
+    @Inject(REQUEST) private req: any,
+  ) {}
 
   @Get()
   list(): Promise<any> {
+    console.log(this.req.local);
     return this.rolesService.list();
   }
 

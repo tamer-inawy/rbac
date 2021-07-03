@@ -30,6 +30,8 @@ export class CollectionsService {
 
   async update(id: string, dto: EditCollectionDto) {
     const collection = await this.findOne(id);
+    if (!collection) return null;
+
     const editedCollection = Object.assign(collection, dto);
     return this.collectionsRepository.save(editedCollection);
   }

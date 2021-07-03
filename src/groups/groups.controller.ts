@@ -1,8 +1,4 @@
 import { REQUEST } from '@nestjs/core';
-
-import { EditGroupDto } from 'src/groups/dto/edit.group.dto';
-import { CreateGroupDto } from 'src/groups/dto/create.group.dto';
-import { GroupsService } from 'src/groups/groups.service';
 import {
   Body,
   Controller,
@@ -13,6 +9,10 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+
+import { EditGroupDto } from 'src/groups/dto/edit.group.dto';
+import { CreateGroupDto } from 'src/groups/dto/create.group.dto';
+import { GroupsService } from 'src/groups/groups.service';
 
 @Controller('groups')
 export class GroupsController {
@@ -29,8 +29,13 @@ export class GroupsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id): Promise<any> {
-    return this.groupsService.findOne(id);
+  async findOne(@Param('id') id): Promise<any> {
+    const group = await this.groupsService.findOne(id);
+    if (this.req.user.isGlobalManager) return group;
+
+    for (let role of this.req.user.user.roles) {
+      if (role.group === group.id) return group;
+    }
   }
 
   @Post()
