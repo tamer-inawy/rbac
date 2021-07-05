@@ -49,39 +49,17 @@ export class UsersController {
 
   @Post()
   async create(@Body() userDto: CreateUserDto) {
-    // TODO: Combine creating users with roles for better handling,
-    //       for now the user is allowed to create a new user if he is a global manager or a manager for any group
-    if (
-      !this.req.user.isGlobalManager &&
-      this.req.user.managedGroups.length === 0
-    )
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     return this.usersService.create(userDto);
   }
 
   @Delete(':id')
   async deleteOne(@Param('id') id) {
-    const user: User = await this.usersService.findOne(id);
-    if (
-      this.req.user.isGlobalManager ||
-      this.usersService.isUserInGroup(user, this.req.user.managedGroups) ||
-      this.req.user.user.id === user.id
-    )
-      // TODO: delete the roles of the user before deleting the user, for now it's handled by db cascade
-      return this.usersService.delete(id);
-
-    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    // TODO: delete the roles of the user before deleting the user, for now it's handled by db cascade
+    return this.usersService.delete(id);
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() userDto: EditUserDto) {
-    const user: User = await this.usersService.findOne(id);
-    if (
-      this.req.user.isGlobalManager ||
-      this.usersService.isUserInGroup(user, this.req.user.managedGroups) ||
-      this.req.user.user.id === user.id
-    )
-      return this.usersService.update(id, userDto);
-    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    return this.usersService.update(id, userDto);
   }
 }

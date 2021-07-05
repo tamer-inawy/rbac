@@ -4,12 +4,17 @@ import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from 'src/auth/decorators/public.decorator';
 import { ROLES_KEY } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/role.enum';
+import { User } from 'src/users/user.entity';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    private usersService: UsersService,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -25,13 +30,60 @@ export class RolesGuard implements CanActivate {
       userRoles.filter((el) => el.role === Role.GlobalManager).length !== 0;
 
     req.user.isGlobalManager = isGlobalManager;
-    req.user.managedGroups = isGlobalManager
+    const managedGroups = (req.user.managedGroups = isGlobalManager
       ? []
       : userRoles
           .filter((el) => el.role === Role.Manager)
-          .map((el) => el.group.id);
-    req.user.isRegularUser = !req.user.managedGroups.length && !isGlobalManager;
+          .map((el) => el.group.id));
+    const isRegularUser = (req.user.isRegularUser =
+      !req.user.managedGroups.length && !isGlobalManager);
 
+    const className = context.getClass().name.replace('Controller', ''); // "CatsController"
+    const methodName = context.getHandler().name; // "create"
+    const requestId = req.params.id;
+    switch (className) {
+      case 'Users':
+        switch (methodName) {
+          case 'create':
+            if (!isGlobalManager && managedGroups.length === 0) return false;
+            return true;
+            break;
+          case 'deleteOne':
+            const userToBeDeleted: User = await this.usersService.findOne(
+              requestId,
+            );
+
+            if (!userToBeDeleted) return false;
+
+            return (
+              isGlobalManager ||
+              (!isRegularUser &&
+                this.usersService.isUserInGroup(
+                  userToBeDeleted,
+                  managedGroups,
+                )) ||
+              req.user.user.id === userToBeDeleted.id
+            );
+            break;
+          case 'update':
+            const userToBeUpdated: User = await this.usersService.findOne(
+              requestId,
+            );
+
+            if (!userToBeUpdated) return false;
+
+            return (
+              isGlobalManager ||
+              (!isRegularUser &&
+                this.usersService.isUserInGroup(
+                  userToBeUpdated,
+                  managedGroups,
+                )) ||
+              req.user.user.id === userToBeUpdated.id
+            );
+            break;
+        }
+    }
     return true;
   }
 }
