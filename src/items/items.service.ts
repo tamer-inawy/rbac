@@ -1,3 +1,4 @@
+import { CollectionsService } from 'src/collections/collections.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,6 +12,7 @@ export class ItemsService {
   constructor(
     @InjectRepository(Item)
     private itemsRepository: Repository<Item>,
+    private collectionsService: CollectionsService,
   ) {}
 
   async create(resource: CreateItemDto) {
@@ -25,7 +27,17 @@ export class ItemsService {
   }
 
   list(): Promise<Item[]> {
-    return this.itemsRepository.find();
+    return this.itemsRepository.find({ relations: ['parent'] });
+  }
+
+  listByGroups(groups: Array<number>): Promise<Item[]> {
+    return this.itemsRepository
+      .find({ relations: ['parent', 'parent.grp'] })
+      .then((items) =>
+        items.filter((item) => {
+          return groups.includes(item.parent.grp?.id);
+        }),
+      );
   }
 
   async update(id: string, dto: EditItemDto) {
@@ -37,6 +49,8 @@ export class ItemsService {
   }
 
   findOne(id: string): Promise<Item> {
-    return this.itemsRepository.findOne(id);
+    return this.itemsRepository.findOne(id, {
+      relations: ['parent', 'parent.grp'],
+    });
   }
 }

@@ -16,6 +16,6 @@ export class Item extends BaseEntity {
   @Column()
   name: string;
 
-  @Column()
-  parentId: number;
+  @ManyToOne((type) => Collection, (collection) => collection.items)
+  parent: Collection;
 }

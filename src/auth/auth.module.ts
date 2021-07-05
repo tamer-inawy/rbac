@@ -1,3 +1,4 @@
+import { ItemsModule } from 'src/items/items.module';
 import { CollectionsModule } from 'src/collections/collections.module';
 import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
@@ -18,6 +19,7 @@ import { JwtStrategy } from 'src/auth/jwt.strategy';
     ConfigModule.forRoot({ isGlobal: true }),
     UsersModule,
     RolesModule,
+    ItemsModule,
     CollectionsModule,
     PassportModule,
     JwtModule.register({

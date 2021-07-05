@@ -1,3 +1,4 @@
+import { ItemsService } from 'src/items/items.service';
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
@@ -15,6 +16,7 @@ export class RolesGuard implements CanActivate {
     private reflector: Reflector,
     private usersService: UsersService,
     private rolesService: RolesService,
+    private itemsService: ItemsService,
     private readonly collectionsService: CollectionsService,
   ) {}
 
@@ -140,6 +142,34 @@ export class RolesGuard implements CanActivate {
               isGlobalManager ||
               (managedGroups.includes(collectionToBeUpdated?.grp?.id) &&
                 (!req.body.grp || managedGroups.includes(req.body.grp)))
+            );
+        }
+
+      case 'Items':
+        const itemToBeUpdated = await this.itemsService.findOne(requestId);
+
+        switch (methodName) {
+          case Action.List:
+            return !isRegularUser;
+
+          case Action.Create:
+            const allowedCollections = await this.collectionsService
+              .listByGroups(managedGroups)
+              .then((collections) =>
+                collections.map((collection) => collection.id),
+              );
+            return (
+              isGlobalManager || allowedCollections.includes(+req.body.parent)
+            );
+
+          case Action.Find:
+          case Action.Update:
+          case Action.Delete:
+            if (!itemToBeUpdated) return false;
+
+            return (
+              isGlobalManager ||
+              managedGroups.includes(itemToBeUpdated.parent.grp.id)
             );
         }
     }
