@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Role } from 'src/roles/role.entity';
 import { CreateRoleDto } from 'src/roles/dto/create.role.dto';
 import { EditRoleDto } from 'src/roles/dto/edit.role.dto';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Injectable()
 export class RolesService {
@@ -24,7 +25,26 @@ export class RolesService {
   }
 
   list(): Promise<Role[]> {
-    return this.rolesRepository.find();
+    return this.rolesRepository
+      .find({ relations: ['group', 'user'] })
+      .then((roles) =>
+        roles.map((role) => {
+          delete role.user.password;
+          return role;
+        }),
+      );
+  }
+
+  listByGroups(groups: Array<number>): Promise<Role[]> {
+    console.log(groups);
+    return this.rolesRepository
+      .find({ relations: ['group', 'user'] })
+      .then((roles) =>
+        roles.filter((role) => {
+          delete role.user.password;
+          return groups.includes(role.group?.id);
+        }),
+      );
   }
 
   async update(id: string, dto: EditRoleDto) {
@@ -36,6 +56,6 @@ export class RolesService {
   }
 
   findOne(id: string): Promise<Role> {
-    return this.rolesRepository.findOne(id);
+    return this.rolesRepository.findOne(id, { relations: ['group'] });
   }
 }

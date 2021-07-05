@@ -24,14 +24,13 @@ export class RolesGuard implements CanActivate {
     const isGlobalManager =
       userRoles.filter((el) => el.role === Role.GlobalManager).length !== 0;
 
-    if (!userRoles.length && !isGlobalManager) req.isRegularUser = true;
-
     req.user.isGlobalManager = isGlobalManager;
     req.user.managedGroups = isGlobalManager
       ? []
       : userRoles
           .filter((el) => el.role === Role.Manager)
-          .map((el) => el.groupid);
+          .map((el) => el.group.id);
+    req.user.isRegularUser = !req.user.managedGroups.length && !isGlobalManager;
 
     return true;
   }

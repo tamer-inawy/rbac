@@ -62,6 +62,7 @@ export class UsersService {
       dto.password = await bcrypt.hash(dto.password, +process.env.BCRYPT_SALT);
 
     const user = await this.findOne(id);
+    if (!user) return null;
 
     const editedUser = Object.assign(user, dto);
     return this.usersRepository.save(editedUser);
@@ -79,7 +80,7 @@ export class UsersService {
   findOneByEmail(email: string): Promise<User> {
     return this.usersRepository.findOne({
       where: { email },
-      relations: ['roles'],
+      relations: ['roles', 'roles.group'],
     });
   }
 

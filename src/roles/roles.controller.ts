@@ -4,6 +4,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Inject,
   Param,
   Post,
@@ -23,28 +25,62 @@ export class RolesController {
 
   @Get()
   list(): Promise<any> {
-    console.log(this.req.local);
-    return this.rolesService.list();
+    if (this.req.user.isRegularUser)
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+
+    if (this.req.user.isGlobalManager) return this.rolesService.list();
+
+    return this.rolesService.listByGroups(this.req.user.managedGroups);
   }
 
   @Get(':id')
-  findOne(@Param('id') id): Promise<any> {
-    // console.log(params);
-    return this.rolesService.findOne(id);
+  async findOne(@Param('id') id): Promise<any> {
+    const role = await this.rolesService.findOne(id);
+
+    if (
+      this.req.user.isGlobalManager ||
+      this.req.user.managedGroups.includes(role.group.id)
+    )
+      return role;
+
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 
   @Post()
   async create(@Body() roleDto: CreateRoleDto) {
-    return this.rolesService.create(roleDto);
+    if (
+      this.req.user.isGlobalManager ||
+      this.req.user.managedGroups.includes(roleDto.group)
+    )
+      return this.rolesService.create(roleDto);
+
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 
   @Delete(':id')
-  deleteOne(@Param('id') id) {
-    return this.rolesService.delete(id);
+  async deleteOne(@Param('id') id) {
+    const role = await this.rolesService.findOne(id);
+
+    if (
+      this.req.user.isGlobalManager ||
+      this.req.user.managedGroups.includes(role.group.id)
+    )
+      return this.rolesService.delete(id);
+
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() roleDto: EditRoleDto) {
-    return this.rolesService.update(id, roleDto);
+  async update(@Param('id') id: string, @Body() roleDto: EditRoleDto) {
+    const role = await this.rolesService.findOne(id);
+
+    if (
+      this.req.user.isGlobalManager ||
+      (this.req.user.managedGroups.includes(role.group.id) &&
+        this.req.user.managedGroups.includes(roleDto.group))
+    )
+      return this.rolesService.update(id, roleDto);
+
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 }

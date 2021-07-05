@@ -53,8 +53,7 @@ export class GroupsService {
       .then((list) => {
         // TODO: Replace the next filter with db query for better performance
         return list.filter((group) => {
-          if (groups.indexOf(group.id) !== -1) return true;
-          return false;
+          return groups.includes(group.id);
         });
       });
   }

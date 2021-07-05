@@ -4,6 +4,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Inject,
   Param,
   Post,
@@ -23,6 +25,9 @@ export class GroupsController {
 
   @Get()
   list(): Promise<any> {
+    if (this.req.user.isRegularUser)
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+
     return this.req.user.isGlobalManager
       ? this.groupsService.list()
       : this.groupsService.listByGroups(this.req.user.managedGroups);
@@ -30,27 +35,44 @@ export class GroupsController {
 
   @Get(':id')
   async findOne(@Param('id') id): Promise<any> {
+    if (this.req.user.isRegularUser)
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+
     const group = await this.groupsService.findOne(id);
     if (this.req.user.isGlobalManager) return group;
 
-    for (let role of this.req.user.user.roles) {
+    for (const role of this.req.user.user.roles) {
       if (role.group === group.id) return group;
     }
   }
 
   @Post()
   create(@Body() groupDto: CreateGroupDto) {
+    if (!this.req.user.isGlobalManager)
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+
     return this.groupsService.create(groupDto);
   }
 
   @Delete(':id')
-  deleteOne(@Param() params) {
-    return this.groupsService.delete(params.id);
+  deleteOne(@Param('id') id) {
+    if (
+      this.req.user.isGlobalManager ||
+      this.req.user.managedGroups.includes(id)
+    )
+      return this.groupsService.delete(id);
+
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() groupDto: EditGroupDto) {
-    // console.log(groupDto);
-    return this.groupsService.update(id, groupDto);
+    if (
+      this.req.user.isGlobalManager ||
+      this.req.user.managedGroups.includes(id)
+    )
+      return this.groupsService.update(id, groupDto);
+
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 }
