@@ -18,10 +18,7 @@ export class Role extends BaseEntity {
   @Column('enum', { enum: RoleEnum })
   role: RoleEnum;
 
-  // @Column()
-  // groupid: number | null;
-
-  @ManyToOne((type) => User, (user) => user.roles)
+  @ManyToOne((type) => User, (user) => user.roles, { nullable: false })
   user: User;
 
   @ManyToOne((type) => Group, (group) => group.roles)
