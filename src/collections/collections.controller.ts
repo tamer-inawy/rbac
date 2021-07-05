@@ -1,8 +1,10 @@
+import { REQUEST } from '@nestjs/core';
 import {
   Body,
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Post,
   Put,
@@ -14,16 +16,20 @@ import { CollectionsService } from 'src/collections/collections.service';
 
 @Controller('collections')
 export class CollectionsController {
-  constructor(private readonly collectionsService: CollectionsService) {}
+  constructor(
+    @Inject(REQUEST) private req: any,
+    private readonly collectionsService: CollectionsService,
+  ) {}
 
   @Get()
   list(): Promise<any> {
-    return this.collectionsService.list();
+    if (this.req.user.isGlobalManager) return this.collectionsService.list();
+
+    return this.collectionsService.listByGroups(this.req.user.managedGroups);
   }
 
   @Get(':id')
   findOne(@Param('id') id): Promise<any> {
-    // console.log(params);
     return this.collectionsService.findOne(id);
   }
 

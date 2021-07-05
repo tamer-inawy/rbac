@@ -25,7 +25,20 @@ export class CollectionsService {
   }
 
   list(): Promise<Collection[]> {
-    return this.collectionsRepository.find();
+    return this.collectionsRepository.find({ relations: ['grp'] });
+  }
+
+  listByGroups(groups: Array<number>): Promise<Collection[]> {
+    return this.collectionsRepository
+      .find({
+        relations: ['grp'],
+        // where: { grp: groups },
+      })
+      .then((collections) =>
+        collections.filter((collection) => {
+          return groups.includes(collection.grp.id);
+        }),
+      );
   }
 
   async update(id: string, dto: EditCollectionDto) {
@@ -37,6 +50,6 @@ export class CollectionsService {
   }
 
   findOne(id: string): Promise<Collection> {
-    return this.collectionsRepository.findOne(id);
+    return this.collectionsRepository.findOne(id, { relations: ['grp'] });
   }
 }

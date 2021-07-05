@@ -1,6 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
+import { CollectionsService } from 'src/collections/collections.service';
 import { IS_PUBLIC_KEY } from 'src/auth/decorators/public.decorator';
 import { Role } from 'src/auth/enums/role.enum';
 import { Action } from 'src/auth/enums/action.enum';
@@ -14,6 +15,7 @@ export class RolesGuard implements CanActivate {
     private reflector: Reflector,
     private usersService: UsersService,
     private rolesService: RolesService,
+    private readonly collectionsService: CollectionsService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -84,14 +86,16 @@ export class RolesGuard implements CanActivate {
         }
 
       case 'Roles':
-        const role = await this.rolesService.findOne(requestId);
+        const roleToBeUpdated = await this.rolesService.findOne(requestId);
         switch (methodName) {
           case Action.List:
             return !isRegularUser;
 
           case Action.Find:
             return (
-              role && (isGlobalManager || managedGroups.includes(role.group.id))
+              roleToBeUpdated &&
+              (isGlobalManager ||
+                managedGroups.includes(roleToBeUpdated.group.id))
             );
 
           case Action.Create:
@@ -99,15 +103,43 @@ export class RolesGuard implements CanActivate {
 
           case Action.Delete:
             return (
-              role && (isGlobalManager || managedGroups.includes(role.group.id))
+              roleToBeUpdated &&
+              (isGlobalManager ||
+                managedGroups.includes(roleToBeUpdated.group.id))
             );
 
           case Action.Update:
             return (
-              role &&
+              roleToBeUpdated &&
               (isGlobalManager ||
-                (managedGroups.includes(role.group.id) &&
+                (managedGroups.includes(roleToBeUpdated.group.id) &&
                   managedGroups.includes(req.body.group)))
+            );
+        }
+
+      case 'Collections':
+        const collectionToBeUpdated = await this.collectionsService.findOne(
+          requestId,
+        );
+        switch (methodName) {
+          case Action.List:
+            return !isRegularUser;
+
+          case Action.Create:
+            return isGlobalManager || managedGroups.includes(req.body.grp);
+
+          case Action.Find:
+          case Action.Delete:
+            return (
+              isGlobalManager ||
+              managedGroups.includes(collectionToBeUpdated?.grp?.id)
+            );
+
+          case Action.Update:
+            return (
+              isGlobalManager ||
+              (managedGroups.includes(collectionToBeUpdated?.grp?.id) &&
+                (!req.body.grp || managedGroups.includes(req.body.grp)))
             );
         }
     }

@@ -1,3 +1,4 @@
+import { CollectionsModule } from 'src/collections/collections.module';
 import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
@@ -17,6 +18,7 @@ import { JwtStrategy } from 'src/auth/jwt.strategy';
     ConfigModule.forRoot({ isGlobal: true }),
     UsersModule,
     RolesModule,
+    CollectionsModule,
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,

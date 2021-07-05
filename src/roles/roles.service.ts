@@ -36,7 +36,6 @@ export class RolesService {
   }
 
   listByGroups(groups: Array<number>): Promise<Role[]> {
-    console.log(groups);
     return this.rolesRepository
       .find({ relations: ['group', 'user'] })
       .then((roles) =>
