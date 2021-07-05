@@ -2,7 +2,6 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 import { IS_PUBLIC_KEY } from 'src/auth/decorators/public.decorator';
-import { ROLES_KEY } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/role.enum';
 import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
@@ -47,24 +46,8 @@ export class RolesGuard implements CanActivate {
           case 'create':
             if (!isGlobalManager && managedGroups.length === 0) return false;
             return true;
-            break;
+
           case 'deleteOne':
-            const userToBeDeleted: User = await this.usersService.findOne(
-              requestId,
-            );
-
-            if (!userToBeDeleted) return false;
-
-            return (
-              isGlobalManager ||
-              (!isRegularUser &&
-                this.usersService.isUserInGroup(
-                  userToBeDeleted,
-                  managedGroups,
-                )) ||
-              req.user.user.id === userToBeDeleted.id
-            );
-            break;
           case 'update':
             const userToBeUpdated: User = await this.usersService.findOne(
               requestId,
@@ -81,7 +64,20 @@ export class RolesGuard implements CanActivate {
                 )) ||
               req.user.user.id === userToBeUpdated.id
             );
-            break;
+        }
+
+      case 'Groups':
+        switch (methodName) {
+          case 'list':
+            return !isRegularUser;
+
+          case 'create':
+            return isGlobalManager;
+
+          case 'findOne':
+          case 'deleteOne':
+          case 'update':
+            return isGlobalManager || managedGroups.includes(+requestId);
         }
     }
     return true;
