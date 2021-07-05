@@ -25,9 +25,6 @@ export class RolesController {
 
   @Get()
   list(): Promise<any> {
-    if (this.req.user.isRegularUser)
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-
     if (this.req.user.isGlobalManager) return this.rolesService.list();
 
     return this.rolesService.listByGroups(this.req.user.managedGroups);
@@ -35,52 +32,21 @@ export class RolesController {
 
   @Get(':id')
   async findOne(@Param('id') id): Promise<any> {
-    const role = await this.rolesService.findOne(id);
-
-    if (
-      this.req.user.isGlobalManager ||
-      this.req.user.managedGroups.includes(role.group.id)
-    )
-      return role;
-
-    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    return await this.rolesService.findOne(id);
   }
 
   @Post()
   async create(@Body() roleDto: CreateRoleDto) {
-    if (
-      this.req.user.isGlobalManager ||
-      this.req.user.managedGroups.includes(roleDto.group)
-    )
-      return this.rolesService.create(roleDto);
-
-    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    return this.rolesService.create(roleDto);
   }
 
   @Delete(':id')
   async deleteOne(@Param('id') id) {
-    const role = await this.rolesService.findOne(id);
-
-    if (
-      this.req.user.isGlobalManager ||
-      this.req.user.managedGroups.includes(role.group.id)
-    )
-      return this.rolesService.delete(id);
-
-    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    return this.rolesService.delete(id);
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() roleDto: EditRoleDto) {
-    const role = await this.rolesService.findOne(id);
-
-    if (
-      this.req.user.isGlobalManager ||
-      (this.req.user.managedGroups.includes(role.group.id) &&
-        this.req.user.managedGroups.includes(roleDto.group))
-    )
-      return this.rolesService.update(id, roleDto);
-
-    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    return this.rolesService.update(id, roleDto);
   }
 }

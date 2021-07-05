@@ -2,15 +2,18 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 import { IS_PUBLIC_KEY } from 'src/auth/decorators/public.decorator';
-import { Role } from 'src/auth/role.enum';
+import { Role } from 'src/auth/enums/role.enum';
+import { Action } from 'src/auth/enums/action.enum';
 import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { RolesService } from 'src/roles/roles.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private usersService: UsersService,
+    private rolesService: RolesService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -43,12 +46,12 @@ export class RolesGuard implements CanActivate {
     switch (className) {
       case 'Users':
         switch (methodName) {
-          case 'create':
+          case Action.Create:
             if (!isGlobalManager && managedGroups.length === 0) return false;
             return true;
 
-          case 'deleteOne':
-          case 'update':
+          case Action.Delete:
+          case Action.Update:
             const userToBeUpdated: User = await this.usersService.findOne(
               requestId,
             );
@@ -68,16 +71,44 @@ export class RolesGuard implements CanActivate {
 
       case 'Groups':
         switch (methodName) {
-          case 'list':
+          case Action.List:
             return !isRegularUser;
 
-          case 'create':
+          case Action.Create:
             return isGlobalManager;
 
-          case 'findOne':
-          case 'deleteOne':
-          case 'update':
+          case Action.Find:
+          case Action.Delete:
+          case Action.Update:
             return isGlobalManager || managedGroups.includes(+requestId);
+        }
+
+      case 'Roles':
+        const role = await this.rolesService.findOne(requestId);
+        switch (methodName) {
+          case Action.List:
+            return !isRegularUser;
+
+          case Action.Find:
+            return (
+              role && (isGlobalManager || managedGroups.includes(role.group.id))
+            );
+
+          case Action.Create:
+            return isGlobalManager || managedGroups.includes(req.body.group);
+
+          case Action.Delete:
+            return (
+              role && (isGlobalManager || managedGroups.includes(role.group.id))
+            );
+
+          case Action.Update:
+            return (
+              role &&
+              (isGlobalManager ||
+                (managedGroups.includes(role.group.id) &&
+                  managedGroups.includes(req.body.group)))
+            );
         }
     }
     return true;

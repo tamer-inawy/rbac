@@ -7,7 +7,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 
-import { Role as RoleEnum } from 'src/auth/role.enum';
+import { Role as RoleEnum } from 'src/auth/enums/role.enum';
 import { Group } from 'src/groups/group.entity';
 
 @Entity()

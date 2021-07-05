@@ -1,4 +1,4 @@
-import { Role } from 'src/auth/role.enum';
+import { Role } from 'src/auth/enums/role.enum';
 import { Group } from 'src/groups/group.entity';
 import { User } from 'src/users/user.entity';
 
