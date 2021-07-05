@@ -49,8 +49,8 @@ CREATE TABLE IF NOT EXISTS `rbac`.`collection` (
   CONSTRAINT `fk_collection_group1`
     FOREIGN KEY (`grpid`)
     REFERENCES `rbac`.`group` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -66,8 +66,8 @@ CREATE TABLE IF NOT EXISTS `rbac`.`item` (
   CONSTRAINT `fk_item_collection1`
     FOREIGN KEY (`parentid`)
     REFERENCES `rbac`.`collection` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -100,8 +100,7 @@ SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 
-
-
 INSERT INTO `rbac`.`user` (`id`, `email`, `password`) VALUES (NULL, 'admin@test.com', '$2b$10$LWoIC8MoNAcs2j39x6K7gOETyEhpkWXOBMkk.z4hiAwleYCWadGj.');
 
 INSERT INTO `rbac`.`role` (`id`, `role`, `groupid`, `userid`) VALUES (NULL, 'globalManager', NULL, '1');
+
