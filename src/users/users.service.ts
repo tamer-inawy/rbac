@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 import { User } from 'src/users/user.entity';
 import { CreateUserDto } from 'src/users/dto/create.user.dto';
 import { EditUserDto } from 'src/users/dto/edit.user.dto';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -33,6 +33,7 @@ export class UsersService {
     const list = await this.usersRepository.find({
       relations: ['roles'],
     });
+
     // TODO: Elemenate the password from the entity using @Column({select: false}) instead of the following map
     return list.map((user) => {
       delete user?.password;

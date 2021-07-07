@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   mariadb:
@@ -7,9 +7,9 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_ROOT_PASSWORD=
       - MYSQL_RANDOM_ROOT_PASSWORD=no
-      - MYSQL_DATABASE=sws
-    # volumes:
-    #   - mariadb_data:/bitnami
+      - MYSQL_DATABASE=rbac
+    volumes:
+      - mariadb_data:/bitnami
     ports:
       - '3306:3306'
     networks:
@@ -20,6 +20,7 @@ services:
     image: nestjs-api-dev:1.0.0
     build:
       context: .
+      target: development
       dockerfile: ./Dockerfile
     command: npm run start:debug
     ports:
@@ -31,11 +32,27 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     restart: unless-stopped
+  # prod:
+  #   container_name: nestjs_api_prod
+  #   image: nestjs-api-prod:1.0.0
+  #   build:
+  #     context: .
+  #     target: production
+  #     dockerfile: ./Dockerfile
+  #   command: npm run start:prod
+  #   ports:
+  #     - 3000:3000
+  #     - 9229:9229
+  #   networks:
+  #     - nesjs-network
+  #   volumes:
+  #     - .:/usr/src/app
+  #     - /usr/src/app/node_modules
+  #   restart: unless-stopped
 
 networks:
   nesjs-network:
 
-
-# volumes:
-#   mariadb_data:
-#     driver: local
+volumes:
+  mariadb_data:
+    driver: local
