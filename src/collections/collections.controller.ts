@@ -10,7 +10,7 @@ import {
   Put,
 } from '@nestjs/common';
 
-import { EditCollectionDto } from './dto/edit.collection.dto';
+import { EditCollectionDto } from 'src/collections/dto/edit.collection.dto';
 import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
 import { CollectionsService } from 'src/collections/collections.service';
 

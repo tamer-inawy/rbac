@@ -10,7 +10,7 @@ import {
   Put,
 } from '@nestjs/common';
 
-import { EditRoleDto } from './dto/edit.role.dto';
+import { EditRoleDto } from 'src/roles/dto/edit.role.dto';
 import { CreateRoleDto } from 'src/roles/dto/create.role.dto';
 import { RolesService } from 'src/roles/roles.service';
 

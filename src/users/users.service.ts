@@ -44,14 +44,14 @@ export class UsersService {
   listByGroups(userId: number, groups: Array<number>): Promise<User[]> {
     return this.usersRepository
       .find({
-        relations: ['roles'],
+        relations: ['roles', 'roles.group'],
       })
       .then((list) => {
         // TODO: Replace the next filter with db query for better performance
         return list.filter((user) => {
           delete user?.password;
-          for (const r of user.roles) {
-            if (groups.indexOf(r.group.id) !== -1) return true;
+          for (const role of user.roles) {
+            if (groups.indexOf(role.group?.id) !== -1) return true;
           }
           return user.id === userId;
         });
