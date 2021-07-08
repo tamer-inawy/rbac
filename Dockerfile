@@ -8,6 +8,8 @@ RUN npm install
 
 COPY . .
 
+RUN npm test
+
 RUN npm run build
 
 FROM node:12.19.0-alpine3.9 as production
