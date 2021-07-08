@@ -87,7 +87,7 @@ export class UsersService {
 
   isUserInGroup(user: User, groups: Array<number>) {
     for (const r of user.roles) {
-      if (groups.indexOf(r.group.id) !== -1) return true;
+      if (groups.indexOf(r.group?.id) !== -1) return true;
     }
     return false;
   }

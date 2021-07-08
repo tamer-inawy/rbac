@@ -44,11 +44,14 @@ export class RolesGuard implements CanActivate {
     const isRegularUser = (req.user.isRegularUser =
       !req.user.managedGroups.length && !isGlobalManager);
 
-    const className = context.getClass().name.replace('Controller', ''); // "CatsController"
+    const className = context.getClass().name.replace('Controller', '');
     const methodName = context.getHandler().name; // "create"
     const requestId = req.params.id;
     switch (className) {
       case 'Users':
+        const userToBeUpdated: User = await this.usersService.findOne(
+          requestId,
+        );
         switch (methodName) {
           case Action.Create:
             if (!isGlobalManager && managedGroups.length === 0) return false;
@@ -56,10 +59,6 @@ export class RolesGuard implements CanActivate {
 
           case Action.Delete:
           case Action.Update:
-            const userToBeUpdated: User = await this.usersService.findOne(
-              requestId,
-            );
-
             if (!userToBeUpdated) return false;
 
             return (
@@ -69,6 +68,13 @@ export class RolesGuard implements CanActivate {
                   userToBeUpdated,
                   managedGroups,
                 )) ||
+              req.user.user.id === userToBeUpdated.id
+            );
+
+          case Action.Find:
+            return (
+              isGlobalManager ||
+              this.usersService.isUserInGroup(userToBeUpdated, managedGroups) ||
               req.user.user.id === userToBeUpdated.id
             );
         }
