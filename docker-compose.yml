@@ -4,37 +4,47 @@ services:
   mariadb:
     build: ./db
     environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-      - MYSQL_ROOT_PASSWORD=
-      - MYSQL_RANDOM_ROOT_PASSWORD=no
+      - MARIADB_ROOT_PASSWORD=bitnami
       - MYSQL_DATABASE=rbac
     volumes:
       - mariadb_data:/bitnami
     ports:
       - '3306:3306'
     networks:
-      - nesjs-network
+      - rbac-network
 
   dev:
-    container_name: nestjs_api_dev
-    image: nestjs-api-dev:1.0.0
+    container_name: rbac_api_dev
+    image: rbac-api-dev:1.0.0
     build:
       context: .
       target: development
       dockerfile: ./Dockerfile
-    command: npm run start:debug
+    command: tail -f /dev/null  # yarn start:debug
     ports:
       - 3000:3000
       - 9229:9229
     networks:
-      - nesjs-network
+      - rbac-network
     volumes:
       - .:/usr/src/app
-      - /usr/src/app/node_modules
+    depends_on:
+      - mariadb
     restart: unless-stopped
+
+  phpmyadmin:
+    image: bitnami/phpmyadmin:latest
+    ports:
+      - '80:80'
+      - '443:8443'
+    depends_on:
+      - mariadb
+    networks:
+      - rbac-network
+
   # prod:
-  #   container_name: nestjs_api_prod
-  #   image: nestjs-api-prod:1.0.0
+  #   container_name: rbac_api_prod
+  #   image: rbac-api-prod:1.0.0
   #   build:
   #     context: .
   #     target: production
@@ -44,14 +54,14 @@ services:
   #     - 3000:3000
   #     - 9229:9229
   #   networks:
-  #     - nesjs-network
+  #     - rbac-network
   #   volumes:
   #     - .:/usr/src/app
   #     - /usr/src/app/node_modules
   #   restart: unless-stopped
 
 networks:
-  nesjs-network:
+  rbac-network:
 
 volumes:
   mariadb_data:

@@ -8,6 +8,4 @@ export class CreateUserDto {
   @IsString()
   password: string;
 
-  @IsArray()
-  roles: Role[];
 }

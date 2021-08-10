@@ -1,9 +1,9 @@
 {
   "type": "mysql",
-  "host": "localhost",
+  "host": "mariadb",
   "port": 3306,
   "username": "root",
-  "password": "",
+  "password": "bitnami",
   "database": "rbac",
   "entities": ["dist/**/*.entity{.ts,.js}"],
   "synchronize": false
