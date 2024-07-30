@@ -31,7 +31,7 @@ export class UsersService {
 
   async list(): Promise<User[]> {
     const list = await this.usersRepository.find({
-      relations: ['roles'],
+      relations: ['roles', 'roles.group'],
     });
 
     // TODO: Elemenate the password from the entity using @Column({select: false}) instead of the following map
