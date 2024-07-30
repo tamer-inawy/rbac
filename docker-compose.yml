@@ -1,68 +1,40 @@
-version: '3.8'
+version: '3'
+name: rbac-dev
 
 services:
+  rbac:
+    image: nestjs-container:latest
+    command: yarn start # tail -f /dev/null
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - 3000:3000
+      - 9229:9229
+    networks:
+      - rbac-network
+    working_dir: /usr/src/app
+
   mariadb:
     build: ./db
     environment:
       - MARIADB_ROOT_PASSWORD=bitnami
       - MYSQL_DATABASE=rbac
     volumes:
-      - mariadb_data:/bitnami
+      - ./volumes/db/bitnami:/bitnami
     ports:
       - '3306:3306'
     networks:
       - rbac-network
 
-  dev:
-    container_name: rbac_api_dev
-    image: rbac-api-dev:1.0.0
-    build:
-      context: .
-      target: development
-      dockerfile: ./Dockerfile
-    command: tail -f /dev/null  # yarn start:debug
-    ports:
-      - 3000:3000
-      - 9229:9229
-    networks:
-      - rbac-network
-    volumes:
-      - .:/usr/src/app
-    depends_on:
-      - mariadb
-    restart: unless-stopped
-
-  phpmyadmin:
-    image: bitnami/phpmyadmin:latest
-    ports:
-      - '80:80'
-      - '443:8443'
-    depends_on:
-      - mariadb
-    networks:
-      - rbac-network
-
-  # prod:
-  #   container_name: rbac_api_prod
-  #   image: rbac-api-prod:1.0.0
-  #   build:
-  #     context: .
-  #     target: production
-  #     dockerfile: ./Dockerfile
-  #   command: npm run start:prod
-  #   ports:
-  #     - 3000:3000
-  #     - 9229:9229
-  #   networks:
-  #     - rbac-network
-  #   volumes:
-  #     - .:/usr/src/app
-  #     - /usr/src/app/node_modules
-  #   restart: unless-stopped
-
 networks:
   rbac-network:
 
 volumes:
-  mariadb_data:
+  postgres-data:
+    driver: local
+  pgadmin-data:
+    driver: local
+  mongo-data:
     driver: local
