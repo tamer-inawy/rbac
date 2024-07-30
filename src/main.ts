@@ -6,6 +6,7 @@ import { QueryFailedErrorFilter } from 'src/exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalFilters(new QueryFailedErrorFilter());
+  app.enableCors();
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
