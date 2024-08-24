@@ -66,7 +66,10 @@ export class UsersService {
     if (!user) return null;
 
     const editedUser = Object.assign(user, dto);
-    return this.usersRepository.save(editedUser);
+    return this.usersRepository.save(editedUser).then(user => {
+      const { password, ...rest } = user;
+      return rest;
+    });
   }
 
   async findOne(id: string): Promise<User> {

@@ -5,15 +5,17 @@ import { Repository } from 'typeorm';
 import { Role } from 'src/roles/role.entity';
 import { CreateRoleDto } from 'src/roles/dto/create.role.dto';
 import { EditRoleDto } from 'src/roles/dto/edit.role.dto';
-import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role as Roles } from 'src/roles/role.enum';
 
 @Injectable()
 export class RolesService {
   constructor(
     @InjectRepository(Role) private rolesRepository: Repository<Role>,
-  ) {}
+  ) { }
 
   async create(resource: CreateRoleDto) {
+    if (resource.role === Roles.GlobalManager) resource.group = null;
+
     const newRole = await this.rolesRepository.create(resource);
     const role = await this.rolesRepository.save(newRole);
 

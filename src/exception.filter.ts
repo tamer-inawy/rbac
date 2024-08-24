@@ -9,10 +9,22 @@ export class QueryFailedErrorFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const status = 500;
 
-    response.status(status).json({
-      statusCode: status,
-      message: `${exception.name}: ${exception.message}`,
-      query: exception.query, // Of course never do this in production :)
-    });
+    if (process.env.NODE_ENV === 'dev') {
+
+      response.status(status).json({
+        statusCode: status,
+        message: `${exception.name}: ${exception.message}`,
+        query: exception.query, // Of course never do this in production :)
+      });
+
+    } else {
+
+      response.status(status).json({
+        statusCode: status,
+        message: `Something went wrong!`,
+      });
+
+    }
+
   }
 }
